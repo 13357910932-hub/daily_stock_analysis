@@ -1,0 +1,52 @@
+name: 每日股票分析 300775
+on:
+  schedule:
+    - cron: '30 7 * * 1-5'  # 北京时间15:30 自动运行
+  workflow_dispatch:       # 允许手动触发（有这个才会显示Run按钮）
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 安装依赖
+        run: pip install -r requirements.txt
+
+      - name: 运行分析并发送邮件
+        env:
+          # 全部从 Secrets 读取
+          WEBUI_ENABLED: ${{ secrets.WEBUI_ENABLED }}
+          WEBUI_HOST: ${{ secrets.WEBUI_HOST }}
+          WEBUI_PORT: ${{ secrets.WEBUI_PORT }}
+          STOCK_LIST: ${{ secrets.STOCK_LIST }}
+          ANALYSIS_INTERVAL: ${{ secrets.ANALYSIS_INTERVAL }}
+          ANALYSIS_MODE: ${{ secrets.ANALYSIS_MODE }}
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_SSL: ${{ secrets.SMTP_SSL }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          MAIL_SUBJECT: ${{ secrets.MAIL_SUBJECT }}
+          MAIL_ENABLED: ${{ secrets.MAIL_ENABLED }}
+          ENABLE_TREND_ANALYSIS: ${{ secrets.ENABLE_TREND_ANALYSIS }}
+          ENABLE_RISK_ANALYSIS: ${{ secrets.ENABLE_RISK_ANALYSIS }}
+          ENABLE_OPERATION_SUGGESTION: ${{ secrets.ENABLE_OPERATION_SUGGESTION }}
+          ENABLE_CHART: ${{ secrets.ENABLE_CHART }}
+          ENABLE_NEWS: ${{ secrets.ENABLE_NEWS }}
+          OLLAMA_BASE_URL: ${{ secrets.OLLAMA_BASE_URL }}
+          MODEL_NAME: ${{ secrets.MODEL_NAME }}
+        run: python main.py
+
+      - name: 上传报告
+        uses: actions/upload-artifact@v4
+        with:
+          name: stock-report
+          path: reports/
