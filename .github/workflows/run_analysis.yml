@@ -1,27 +1,30 @@
-name: 股票分析 300775
+name: 股票分析 300775 + 邮件发送
 on:
-  workflow_dispatch:   # 有这个才会出现运行按钮
+  workflow_dispatch:   # 手动运行按钮
 
 jobs:
   run-analysis:
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # 消除Node警告
     steps:
       - uses: actions/checkout@v5
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.10'
 
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run analysis
+      - name: Run analysis and send email
         env:
-          WEBUI_ENABLED: ${{ secrets.WEBUI_ENABLED }}
-          WEBUI_HOST: ${{ secrets.WEBUI_HOST }}
-          WEBUI_PORT: ${{ secrets.WEBUI_PORT }}
+          # 股票
           STOCK_LIST: ${{ secrets.STOCK_LIST }}
+
+          # 邮件配置
+          MAIL_ENABLED: ${{ secrets.MAIL_ENABLED }}
           SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
           SMTP_SSL: ${{ secrets.SMTP_SSL }}
@@ -30,5 +33,9 @@ jobs:
           MAIL_FROM: ${{ secrets.MAIL_FROM }}
           MAIL_TO: ${{ secrets.MAIL_TO }}
           MAIL_SUBJECT: ${{ secrets.MAIL_SUBJECT }}
-          MAIL_ENABLED: ${{ secrets.MAIL_ENABLED }}
+
+          # 网页版
+          WEBUI_ENABLED: ${{ secrets.WEBUI_ENABLED }}
+          WEBUI_HOST: ${{ secrets.WEBUI_HOST }}
+          WEBUI_PORT: ${{ secrets.WEBUI_PORT }}
         run: python main.py
