@@ -1,138 +1,66 @@
-# ===================================
-# A股自选股智能分析系统 - 定制化配置文件
-# 适配需求：300775三角防务分析、Tavily新闻搜索、DeepSeek Reasoner模型、Agent问股、缠论+MACD策略、5%乖离率、每日15点飞书推送
-# ===================================
+name: Daily Stock Analysis - 三角防务每日分析
 
-# --------------------------
-# 1. 目标股票配置
-# --------------------------
-# 自选股列表，仅配置目标股票：300775 三角防务
-env:
-  STOCK_LIST: 300775
-  LLM_DEEPSEEK_API_KEY: ${{ secrets.LLM_DEEPSEEK_API_KEY }}
-# --------------------------
-# 2. 数据源基础配置（默认即可，如需扩展可自行配置）
-# --------------------------
-# Tushare Pro Token（可选，用于获取更详细的财务/基本面数据）
-# TUSHARE_TOKEN=your_tushare_token_here
+# 触发配置：
+# 1. 定时触发：UTC时间7点 = 北京时间15点（下午3点，A股收盘后），仅周一到周五（A股交易日）
+# 2. 支持手动触发，可随时手动运行分析
+on:
+  schedule:
+    - cron: '0 7 * * 1-5'
+  workflow_dispatch:
 
-# --------------------------
-# 3. AI 大模型配置：使用 DeepSeek Reasoner 模型
-# --------------------------
-# DeepSeek API 配置
-LLM_DEEPSEEK_API_KEY=sk-b9b39294a741479898942acaeeacb68a  # 请替换为你的DeepSeek API密钥
-LLM_DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
-LLM_DEEPSEEK_MODELS=deepseek-reasoner  # 指定使用deepseek-reasoner推理模型
+jobs:
+  run-stock-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 拉取项目代码
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-# 其他模型渠道（已禁用，仅使用DeepSeek）
-# LLM_GEMINI_API_KEYS=your_gemini_key_here
-# LLM_GEMINI_MODELS=gemini-2.5-flash
+      # 2. 设置Python环境
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
 
-# --------------------------
-# 4. 搜索引擎配置：使用 Tavily 新闻搜索
-# --------------------------
-# Tavily API 密钥（请替换为你的Tavily API密钥，用于新闻舆情搜索）
-TAVILY_API_KEYS=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
+      # 3. 安装依赖
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 
-# 其他搜索源（已禁用，仅使用Tavily）
-# MINIMAX_API_KEYS=your_minimax_key_here
-# SERPAPI_KEYS=your_serpapi_key_here
-# SEARXNG_BASE_URLS=
-# SEARXNG_PUBLIC_INSTANCES_ENABLED=true
-
-# --------------------------
-# 5. 策略与阈值配置
-# --------------------------
-# 新闻最大时效（天），仅分析3天内的最新新闻
-NEWS_MAX_AGE_DAYS=3
-# 乖离率阈值（%），按需求设置为5%，偏离MA5超过此值将提示风险
-BIAS_THRESHOLD=5.0
-
-# --------------------------
-# 6. Agent 策略问股配置
-# --------------------------
-# 启用 Agent 策略对话模式
-AGENT_MODE=true
-# Agent 最大推理步数上限
-AGENT_MAX_STEPS=10
-# 启用的分析策略：
-# - chan_theory：缠论（缠中说禅理论，笔/线段/中枢分析）
-# - 系统默认自动集成MACD指标分析，满足MACD策略需求
-AGENT_SKILLS=chan_theory
-# 自定义策略目录（默认即可）
-AGENT_SKILL_DIR=./strategies
-# Agent 架构模式（单Agent模式，满足问股需求）
-AGENT_ARCH=single
-# 编排模式：标准模式，技术分析→情报收集→决策输出
-AGENT_ORCHESTRATOR_MODE=standard
-# Agent 执行超时时间（秒）
-AGENT_ORCHESTRATOR_TIMEOUT_S=600
-# 启用风控否决，避免高风险信号
-AGENT_RISK_OVERRIDE=true
-# 关闭历史记忆，保证每日分析独立性
-AGENT_MEMORY_ENABLED=false
-# 启用策略自动加权
-AGENT_SKILL_AUTOWEIGHT=true
-# 策略路由：手动模式，严格使用指定的分析策略
-AGENT_SKILL_ROUTING=manual
-
-# --------------------------
-# 7. 通知渠道配置：飞书推送
-# --------------------------
-# 飞书群机器人配置
-# 请替换为你的飞书群机器人Webhook地址（在飞书群设置中添加自定义机器人获取）
-FEISHU_WEBHOOK_URL=https://open.feishu.cn/open-apis/bot/v2/hook/66d52125-a223-4a98-843b-52337fd369ea
-# 如果飞书机器人开启了签名校验，请填写对应的Secret
-# FEISHU_WEBHOOK_SECRET=your_feishu_webhook_secret_here
-# 飞书机器人安全关键词（如果开启了关键词校验，请保持一致）
-FEISHU_WEBHOOK_KEYWORD=股票日报
-
-# 其他通知渠道（已禁用）
-# WECHAT_WEBHOOK_URL=your_wechat_webhook_url
-# TELEGRAM_BOT_TOKEN=your_telegram_token
-# TELEGRAM_CHAT_ID=your_chat_id
-# PUSHPLUS_TOKEN=your_pushplus_token
-
-# --------------------------
-# 8. 定时任务配置：每日15:00自动执行
-# --------------------------
-# 启用定时任务，实现每日自动分析推送
-SCHEDULE_ENABLED=true
-# 每日执行时间：15:00（下午3点，A股收盘后）
-SCHEDULE_TIME=15:00
-# 定时任务启动时是否立即执行一次（设置为false，等待到15点再执行）
-SCHEDULE_RUN_IMMEDIATELY=false
-# 非定时模式是否立即执行（关闭，仅定时执行）
-RUN_IMMEDIATELY=false
-
-# --------------------------
-# 9. 系统基础配置（默认即可，无需修改）
-# --------------------------
-# 数据库配置
-DATABASE_PATH=./data/stock_analysis.db
-SQLITE_WAL_ENABLED=true
-SQLITE_BUSY_TIMEOUT_MS=5000
-SQLITE_WRITE_RETRY_MAX=3
-SQLITE_WRITE_RETRY_BASE_DELAY=0.1
-
-# 日志配置
-LOG_DIR=./logs
-LOG_LEVEL=INFO
-MAX_WORKERS=3
-DEBUG=false
-
-# 数据源优先级配置（默认即可）
-EFINANCE_PRIORITY=0
-AKSHARE_PRIORITY=1
-TUSHARE_PRIORITY=2
-PYTDX_PRIORITY=2
-BAOSTOCK_PRIORITY=3
-YFINANCE_PRIORITY=4
-
-# 技术指标配置
-ENABLE_REALTIME_TECHNICAL_INDICATORS=true
-ENABLE_CHIP_DISTRIBUTION=false
-ENABLE_FUNDAMENTAL_PIPELINE=true
-
-# 大盘复盘配置
-MARKET_REVIEW_ENABLED=true
+      # 4. 运行每日分析任务
+      - name: Run daily stock analysis
+        env:
+          # 基础配置
+          STOCK_LIST: 300775
+          
+          # DeepSeek模型配置（从Secrets读取密钥）
+          LLM_DEEPSEEK_API_KEY: ${{ secrets.LLM_DEEPSEEK_API_KEY }}
+          LLM_DEEPSEEK_BASE_URL: https://api.deepseek.com/v1
+          LLM_DEEPSEEK_MODELS: deepseek-reasoner
+          
+          # Tavily搜索配置（从Secrets读取密钥）
+          TAVILY_API_KEYS: ${{ secrets.TAVILY_API_KEYS }}
+          
+          # 策略配置
+          BIAS_THRESHOLD: 5.0
+          AGENT_MODE: true
+          AGENT_SKILLS: chan_theory
+          AGENT_SKILL_ROUTING: manual
+          NEWS_MAX_AGE_DAYS: 3
+          
+          # 飞书推送配置（从Secrets读取配置）
+          FEISHU_WEBHOOK_URL: ${{ secrets.FEISHU_WEBHOOK_URL }}
+          FEISHU_WEBHOOK_SECRET: ${{ secrets.FEISHU_WEBHOOK_SECRET }}
+          FEISHU_WEBHOOK_KEYWORD: 股票日报
+          
+          # 运行模式：关闭项目内定时，由GitHub Actions负责定时，运行时立即执行
+          SCHEDULE_ENABLED: false
+          RUN_IMMEDIATELY: true
+          
+          # 系统配置
+          LOG_LEVEL: INFO
+          MAX_WORKERS: 3
+        run: |
+          python main.py
