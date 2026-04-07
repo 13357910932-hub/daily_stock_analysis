@@ -1,0 +1,41 @@
+name: 每日股票分析 300775
+on:
+  schedule:
+    - cron: '10 7 * * 1-5'  # 每天 15:10 自动运行
+  workflow_dispatch:       # 允许手动点运行
+
+jobs:
+  run-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run analysis and send email
+        env:
+          STOCK_LIST: ${{ secrets.STOCK_LIST }}
+          LLM_CHANNELS: ${{ secrets.LLM_CHANNELS }}
+          LLM_PRIMARY_PROTOCOL: ${{ secrets.LLM_PRIMARY_PROTOCOL }}
+          LLM_PRIMARY_BASE_URL: ${{ secrets.LLM_PRIMARY_BASE_URL }}
+          LLM_PRIMARY_API_KEY: ${{ secrets.LLM_PRIMARY_API_KEY }}
+          LLM_PRIMARY_MODELS: ${{ secrets.LLM_PRIMARY_MODELS }}
+          LITELLM_MODEL: ${{ secrets.LITELLM_MODEL }}
+          MAIL_ENABLED: ${{ secrets.MAIL_ENABLED }}
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_SSL: ${{ secrets.SMTP_SSL }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+          MAIL_SUBJECT: ${{ secrets.MAIL_SUBJECT }}
+          BIAS_THRESHOLD: ${{ secrets.BIAS_THRESHOLD }}
+          TAVILY_API_KEYS: ${{ secrets.TAVILY_API_KEYS }}
+          ANALYSIS_INTERVAL: ${{ secrets.ANALYSIS_INTERVAL }}
+          ANALYSIS_MODE: ${{ secrets.ANALYSIS_MODE }}
+          REPORT_LANGUAGE: ${{ secrets.REPORT_LANGUAGE }}
+        run: python main.py
