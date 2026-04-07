@@ -1,7 +1,7 @@
 name: Daily Stock Analysis - 三角防务每日分析
 
 # 触发配置：
-# 1. 定时触发：UTC时间7点 = 北京时间15点（下午3点，A股收盘后），仅周一到周五（A股交易日）
+# 1. 定时触发：UTC时间7点 = 北京时间15:00（下午3点，A股收盘后），仅周一到周五（A股交易日）
 # 2. 支持手动触发，可随时手动运行分析
 on:
   schedule:
@@ -32,6 +32,9 @@ jobs:
       # 4. 运行每日分析任务
       - name: Run daily stock analysis
         env:
+          # 强制Node24兼容，消除之前的警告
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+          
           # 基础配置
           STOCK_LIST: 300775
           
@@ -39,6 +42,9 @@ jobs:
           LLM_DEEPSEEK_API_KEY: ${{ secrets.LLM_DEEPSEEK_API_KEY }}
           LLM_DEEPSEEK_BASE_URL: https://api.deepseek.com/v1
           LLM_DEEPSEEK_MODELS: deepseek-reasoner
+          
+          # 【新增】显式指定Agent使用的模型，解决Agent找不到模型的问题
+          AGENT_LITELLM_MODEL: deepseek/deepseek-reasoner
           
           # Tavily搜索配置（从Secrets读取密钥）
           TAVILY_API_KEYS: ${{ secrets.TAVILY_API_KEYS }}
