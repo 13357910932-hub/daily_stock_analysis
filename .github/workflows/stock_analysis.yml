@@ -9,14 +9,14 @@ jobs:
     steps:
       # 1. 拉取官方分析工具
       - name: 拉取分析工具
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: siacin/daily_stock_analysis
           fetch-depth: 0
 
       # 2. 配置Python环境
       - name: 配置Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.10'
           cache: 'pip'
@@ -40,10 +40,10 @@ jobs:
           OPENAI_BASE_URL=https://api.deepseek.com/v1
           OPENAI_MODEL=deepseek-chat
           
-          # 策略：缠论+MACD+Tavily新闻搜索，5%乖离率
+          # 启用的6个分析策略
           AGENT_MODE=true
-          AGENT_SKILLS=chan_theory,macd,tavily
-          AGENT_MAX_STEPS=15
+          AGENT_SKILLS=bull_trend,ma_golden_cross,shrink_pullback,volume_breakout,one_yang_three_yin,chan_theory
+          AGENT_MAX_STEPS=20
           BIAS_THRESHOLD=5.0
           
           # Tavily新闻搜索API
