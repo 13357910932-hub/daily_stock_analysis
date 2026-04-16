@@ -1,5 +1,5 @@
 name: 中安科股票分析
-# 仅支持手动触发，不会自动运行，你什么时候需要分析，什么时候点一下就行
+# 仅手动触发，不会自动运行
 on:
   workflow_dispatch:
 
@@ -7,7 +7,7 @@ jobs:
   run_analysis:
     runs-on: ubuntu-latest
     steps:
-      # 1. 拉取官方的daily_stock_analysis工具代码
+      # 1. 拉取官方分析工具
       - name: 拉取分析工具
         uses: actions/checkout@v4
         with:
@@ -21,13 +21,14 @@ jobs:
           python-version: '3.10'
           cache: 'pip'
 
-      # 3. 安装依赖
+      # 3. 安装依赖，额外安装Tavily的依赖
       - name: 安装运行依赖
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install tavily-python
 
-      # 4. 配置你的专属分析参数
+      # 4. 配置你的专属参数
       - name: 配置分析参数
         run: |
           cat <<EOF > .env
@@ -39,23 +40,27 @@ jobs:
           OPENAI_BASE_URL=https://api.deepseek.com/v1
           OPENAI_MODEL=deepseek-chat
           
-          # 缠论+MACD分析策略，5%乖离率阈值
+          # 策略：缠论+MACD+Tavily新闻搜索，5%乖离率
           AGENT_MODE=true
-          AGENT_SKILLS=chan_theory
-          AGENT_MAX_STEPS=10
+          AGENT_SKILLS=chan_theory,macd,tavily
+          AGENT_MAX_STEPS=15
           BIAS_THRESHOLD=5.0
           
-          # 自定义提示：告诉AI你的持股成本
-          CUSTOM_PROMPT="用户的持股成本为4.58元，请结合这个成本，给出后续的买卖点建议"
+          # Tavily新闻搜索API
+          TAVILY_API_KEY=${{ secrets.TAVILY_API_KEY }}
           
-          # 飞书通知配置
+          # 启动A股大盘复盘
+          MARKET_REVIEW_ENABLED=true
+          
+          # 完整报告
+          REPORT_TYPE=full
+          
+          # 飞书通知
           FEISHU_WEBHOOK_URL=${{ secrets.FEISHU_WEBHOOK }}
           
-          # 关闭定时任务，仅单次运行
+          # 单次运行，关闭定时
           SCHEDULE_ENABLED=false
           RUN_IMMEDIATELY=true
-          MARKET_REVIEW_ENABLED=false
-          DISABLE_CHIP_ANALYSIS=true
           EOF
 
       # 5. 运行分析
