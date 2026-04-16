@@ -46,8 +46,11 @@ jobs:
           AGENT_MAX_STEPS=20
           BIAS_THRESHOLD=5.0
           
-          # 修正了变量名：TAVILY_API_KEYS（带s，官方要求的变量名）
-          TAVILY_API_KEYS=${{ secrets.TAVILY_API_KEY }}
+          # 修正了Tavily变量名
+          TAVILY_API_KEYS=${{ secrets.TAVILY_API_KEYS }}
+          
+          # 禁用筹码分析，解决"筹码不可用"的提示
+          DISABLE_CHIP_ANALYSIS=true
           
           # 启动A股大盘复盘
           MARKET_REVIEW_ENABLED=true
