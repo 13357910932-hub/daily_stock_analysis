@@ -46,8 +46,8 @@ jobs:
           AGENT_MAX_STEPS=20
           BIAS_THRESHOLD=5.0
           
-          # Tavily新闻搜索API
-          TAVILY_API_KEY=${{ secrets.TAVILY_API_KEY }}
+          # 修正了变量名：TAVILY_API_KEYS（带s，官方要求的变量名）
+          TAVILY_API_KEYS=${{ secrets.TAVILY_API_KEY }}
           
           # 启动A股大盘复盘
           MARKET_REVIEW_ENABLED=true
