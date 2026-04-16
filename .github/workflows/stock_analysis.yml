@@ -1,4 +1,4 @@
-name: 荣晟环保股票分析
+name: 中安科股票分析
 # 仅支持手动触发，不会自动运行，你什么时候需要分析，什么时候点一下就行
 on:
   workflow_dispatch:
@@ -31,8 +31,8 @@ jobs:
       - name: 配置分析参数
         run: |
           cat <<EOF > .env
-          # 目标股票：荣晟环保
-          STOCK_LIST=603165
+          # 目标股票：中安科
+          STOCK_LIST=600654
           
           # DeepSeek API配置
           OPENAI_API_KEY=${{ secrets.DEEPSEEK_API_KEY }}
@@ -46,7 +46,7 @@ jobs:
           BIAS_THRESHOLD=5.0
           
           # 自定义提示：告诉AI你的持股成本
-          CUSTOM_PROMPT="用户的持股成本为15.64元，请结合这个成本，给出后续的买卖点建议"
+          CUSTOM_PROMPT="用户的持股成本为4.58元，请结合这个成本，给出后续的买卖点建议"
           
           # 飞书通知配置
           FEISHU_WEBHOOK_URL=${{ secrets.FEISHU_WEBHOOK }}
