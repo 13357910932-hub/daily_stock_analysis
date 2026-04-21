@@ -1,4 +1,4 @@
-name: 中安科股票分析
+name: 股票分析
 # 仅手动触发，不会自动运行
 on:
   workflow_dispatch:
@@ -32,8 +32,8 @@ jobs:
       - name: 配置分析参数
         run: |
           cat <<EOF > .env
-          # 目标股票：中安科
-          STOCK_LIST=600654
+          # 目标股票：华曙高科
+          STOCK_LIST=688433
           
           # DeepSeek API配置
           OPENAI_API_KEY=${{ secrets.DEEPSEEK_API_KEY }}
