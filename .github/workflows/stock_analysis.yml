@@ -32,8 +32,8 @@ jobs:
       - name: 配置分析参数
         run: |
           cat <<EOF > .env
-          # 目标股票：杭钢股份,宇通重工
-          STOCK_LIST=600126,600817
+          # 目标股票：津荣天宇,宇通重工
+          STOCK_LIST=300988,600817
           
           # DeepSeek API配置
           OPENAI_API_KEY=${{ secrets.DEEPSEEK_API_KEY }}
